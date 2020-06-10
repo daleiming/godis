@@ -11,11 +11,12 @@ import (
 )
 
 type PropertyHolder struct {
-	Bind           string `cfg:"bind"`
-	Port           int    `cfg:"port"`
-	AppendOnly     bool   `cfg:"appendOnly"`
-	AppendFilename string `cfg:"appendFilename"`
-	MaxClients     int    `cfg:"maxclients"`
+	Bind           string   `cfg:"bind"`
+	Port           int      `cfg:"port"`
+	AppendOnly     bool     `cfg:"appendOnly"`
+	AppendFilename string   `cfg:"appendFilename"`
+	MaxClients     int      `cfg:"maxclients"`
+	Peers          []string `cfg:"peers"`
 }
 
 var Properties *PropertyHolder
@@ -30,13 +31,7 @@ func init() {
 }
 
 func LoadConfig(configFilename string) *PropertyHolder {
-	// open config file
-	config := &PropertyHolder{
-		Bind:           "127.0.0.1",
-		Port:           6379,
-		AppendOnly:     true,
-		AppendFilename: "appendonly.aof",
-	}
+	config := Properties
 	file, err := os.Open(configFilename)
 	if err != nil {
 		log.Print(err)
@@ -88,6 +83,11 @@ func LoadConfig(configFilename string) *PropertyHolder {
 			case reflect.Bool:
 				boolValue := "yes" == value
 				fieldVal.SetBool(boolValue)
+			case reflect.Slice:
+				if field.Type.Elem().Kind() == reflect.String {
+					slice := strings.Split(value, ",")
+					fieldVal.Set(reflect.ValueOf(slice))
+				}
 			}
 		}
 	}

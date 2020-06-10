@@ -1,4 +1,4 @@
-package server
+package tcp
 
 /**
  * A tcp server
@@ -39,7 +39,7 @@ func ListenAndServe(cfg *Config, handler tcp.Handler) {
         case syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
             logger.Info("shuting down...")
             closing.Set(true)
-            listener.Close() // listener.Accept() will return err immediately
+            _ = listener.Close() // listener.Accept() will return err immediately
         }
     }()
 
